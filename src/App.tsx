@@ -1,24 +1,19 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from "react";
+import "./App.css";
+import Textfields from "./components/textfields";
+import ConnectionError from "./components/connectionError";
 
 function App() {
+  const [loadingError, setLoadingError] = useState(false);
+  const [key, setKey] = useState(0);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div
+      className="bg-white dark:bg-slate-900 min-h-screen flex flex-col items-center
+                    text-lg"
+    >
+      {loadingError && <ConnectionError setLoadingError={setLoadingError} setKey={setKey} parentKey={key} />}
+      <Textfields key={key} setLoadingError={setLoadingError} />
     </div>
   );
 }
