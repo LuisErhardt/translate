@@ -1,24 +1,29 @@
-import * as React from "react";
-import ReactTooltip from "react-tooltip";
+import { useState } from "react";
+import ReactTooltip from "react-tooltip-rc";
 
 export interface ICopyToClipboardProps {
-  onMouseEnter: () => void;
-  onMouseLeave: () => void;
   onClick: () => void;
-  showTooltip: boolean;
 }
 
 export function CopyToClipboard(props: ICopyToClipboardProps) {
+  const [tooltipText, setTooltipText] = useState("Copy to Clipboard");
   return (
     <div
       className="text-black dark:text-slate-400 hover:text-black dark:hover:text-white
               absolute top-2.5 right-2.5 "
-      data-tip
-      data-for="tooltip"
-      onMouseEnter={props.onMouseEnter}
-      onMouseLeave={props.onMouseLeave}
     >
-      <button onClick={props.onClick}>
+      <button
+        onClick={() => {
+          props.onClick();
+          setTooltipText("Copied to Clipboard");
+          setTimeout(() => {
+            setTooltipText("Copy to Clipboard");
+            ReactTooltip.hide();
+          }, 3000);
+        }}
+        data-for="tooltip"
+        data-tip
+      >
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -34,11 +39,9 @@ export function CopyToClipboard(props: ICopyToClipboardProps) {
           />
         </svg>
       </button>
-      {props.showTooltip && (
-        <ReactTooltip id="tooltip" place="top" effect="solid">
-          Copy to clipboard
-        </ReactTooltip>
-      )}
+      <ReactTooltip id="tooltip" place="top" effect="solid">
+        {tooltipText}
+      </ReactTooltip>
     </div>
   );
 }

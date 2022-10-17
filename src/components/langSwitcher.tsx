@@ -4,7 +4,7 @@ export interface ILangSwitcherProps {
   onClick: () => void;
 }
 
-export function LangSwitcher(props: ILangSwitcherProps) {
+export default function LangSwitcher(props: ILangSwitcherProps) {
   return (
     <div className="text-black dark:text-white">
       <button onClick={props.onClick}>

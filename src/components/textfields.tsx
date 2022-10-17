@@ -1,11 +1,10 @@
 import * as React from "react";
 import { FetchState, fetchTranslation } from "./fetch";
-import LangSelect from "./langSelect";
 import Spinner from "./spinner";
 import { debounce } from "lodash";
-import { LangSwitcher } from "./langSwitcher";
 import { CopyToClipboard } from "./copyToClipboard";
 import { ClearInput } from "./clearInput";
+import { LanguageSelection } from "./languageSelection";
 
 export interface ITextfieldsProps {
   setLoadingError: React.Dispatch<React.SetStateAction<boolean>>;
@@ -36,9 +35,6 @@ export default class Textfields extends React.Component<ITextfieldsProps, ITextf
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
-    this.handleSourceLangChange = this.handleSourceLangChange.bind(this);
-    this.handleTargetLangChange = this.handleTargetLangChange.bind(this);
-    this.handleLanguageSwitch = this.handleLanguageSwitch.bind(this);
     this.clearInput = this.clearInput.bind(this);
   }
 
@@ -57,8 +53,6 @@ export default class Textfields extends React.Component<ITextfieldsProps, ITextf
   }, 300);
 
   handleInputChange(event: React.ChangeEvent<HTMLTextAreaElement>): void {
-    console.log(event);
-
     //on mobile: fit height of textarea dynamically to content height
     if (window.matchMedia("(max-device-width: 760px)").matches) {
       const tx = document.getElementById("textInput");
@@ -71,39 +65,16 @@ export default class Textfields extends React.Component<ITextfieldsProps, ITextf
       }
     }
 
-    let e: any = event.nativeEvent;
-
-    // hide keyboard, if enter is pressed on mobile
-    if (window.matchMedia("(max-device-width: 760px)").matches && e.inputType === "insertLineBreak") {
-      event.target.blur();
-    } else {
-      this.setState({
-        value: event.target.value,
-      });
-      this.debouncedSearch();
-    }
-  }
-
-  handleSourceLangChange(lang: string) {
-    let newLang: string = lang;
     this.setState({
-      sourceLang: newLang,
-    });
-  }
-
-  handleTargetLangChange(lang: string) {
-    let newLang: string = lang;
-    this.setState({
-      targetLang: newLang,
-    });
-  }
-
-  handleLanguageSwitch() {
-    this.setState({
-      sourceLang: this.state.targetLang,
-      targetLang: this.state.sourceLang,
+      value: event.target.value,
     });
     this.debouncedSearch();
+  }
+
+  onKeyUp(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (window.matchMedia("(max-device-width: 760px)").matches && e.key === "Enter") {
+      (e.target as any).blur();
+    }
   }
 
   clearInput() {
@@ -131,19 +102,19 @@ export default class Textfields extends React.Component<ITextfieldsProps, ITextf
     };
     return (
       <div className="flex flex-col items-center w-full pt-10  xl:max-w-[1200px] px-3 md:px-6 xl:px-0 ">
-        <div className="flex justify-between items-center min-w-full max-h-16">
-          <LangSelect
-            onChange={this.handleSourceLangChange}
-            selectedLang={this.state.sourceLang}
-            setLoadingError={this.props.setLoadingError}
-          />
-          <LangSwitcher onClick={this.handleLanguageSwitch} />
-          <LangSelect
-            onChange={this.handleTargetLangChange}
-            selectedLang={this.state.targetLang}
-            setLoadingError={this.props.setLoadingError}
-          />
-        </div>
+        <LanguageSelection
+          sourceLang={this.state.sourceLang}
+          targetLang={this.state.targetLang}
+          handleSourceLangChange={(l: string) => {
+            this.setState({ sourceLang: l });
+            this.debouncedSearch();
+          }}
+          handleTargetLangChange={(l: string) => {
+            this.setState({ targetLang: l });
+            this.debouncedSearch();
+          }}
+          setLoadingError={this.props.setLoadingError}
+        />
         <div className="flex flex-wrap sm:justify-between justify-center min-w-full relative">
           <div id="txtParent" className="relative sm:w-2/5 w-full">
             <textarea
@@ -157,6 +128,7 @@ export default class Textfields extends React.Component<ITextfieldsProps, ITextf
               placeholder={"Enter text to translate"}
               value={this.state.value}
               onChange={this.handleInputChange}
+              onKeyUp={this.onKeyUp}
             />
             {this.state.value ? <ClearInput clearInput={this.clearInput} /> : <div />}
           </div>
@@ -174,17 +146,9 @@ export default class Textfields extends React.Component<ITextfieldsProps, ITextf
             />
             {this.state.fetchState.translatedText ? (
               <CopyToClipboard
-                onMouseEnter={() => {
-                  this.setState({ showTooltip: true });
-                }}
-                onMouseLeave={() => {
-                  this.setState({ showTooltip: false });
-                  setTimeout(() => this.setState({ showTooltip: true }), 50);
-                }}
                 onClick={() => {
                   navigator.clipboard.writeText(this.state.fetchState.translatedText);
                 }}
-                showTooltip={this.state.showTooltip}
               />
             ) : (
               <div />
