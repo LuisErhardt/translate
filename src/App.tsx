@@ -17,7 +17,7 @@ function App() {
 
   return (
     <div
-      className="bg-white dark:bg-slate-900 min-h-screen flex justify-center
+      className="bg-white dark:bg-slate-900 min-h-full flex justify-center
                     text-lg relative"
     >
       <ThemeToggle onClick={() => setColorTheme(switchTheme(colorTheme))} isEnabled={colorTheme === "dark"} />

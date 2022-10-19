@@ -5,6 +5,7 @@ import { debounce } from "lodash";
 import { CopyToClipboard } from "./copyToClipboard";
 import { ClearInput } from "./clearInput";
 import { LanguageSelection } from "./languageSelection";
+import { adaptInputSize, adaptResultSize } from "./util";
 
 export interface ITextfieldsProps {
   setLoadingError: React.Dispatch<React.SetStateAction<boolean>>;
@@ -15,7 +16,7 @@ export interface ITextfieldsState {
   fetchState: FetchState;
   sourceLang: string;
   targetLang: string;
-  showTooltip: boolean;
+  focusRingColor: string;
 }
 
 export default class Textfields extends React.Component<ITextfieldsProps, ITextfieldsState> {
@@ -31,11 +32,12 @@ export default class Textfields extends React.Component<ITextfieldsProps, ITextf
       },
       sourceLang: "de",
       targetLang: "en",
-      showTooltip: true,
+      focusRingColor: "blue-500",
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
     this.clearInput = this.clearInput.bind(this);
+    this.onKeyUp = this.onKeyUp.bind(this);
   }
 
   // delays api call until user stops typing for 300ms
@@ -48,48 +50,41 @@ export default class Textfields extends React.Component<ITextfieldsProps, ITextf
       },
     });
     fetchTranslation(this.state.value, this.state.sourceLang, this.state.targetLang).then((res) => {
-      this.setState({ fetchState: res });
+      this.setState({ fetchState: res, focusRingColor: "green-500" }, () => adaptResultSize());
     });
   }, 300);
 
   handleInputChange(event: React.ChangeEvent<HTMLTextAreaElement>): void {
-    //on mobile: fit height of textarea dynamically to content height
-    if (window.matchMedia("(max-device-width: 760px)").matches) {
-      const tx = document.getElementById("textInput");
-      const txtP = document.getElementById("txtParent");
-      if (tx && txtP) {
-        tx.style.height = "auto";
-        tx.style.height = tx.scrollHeight + "px";
-        txtP.style.height = "auto";
-        txtP.style.height = tx.scrollHeight + 5 + "px";
-      }
-    }
-
-    this.setState({
-      value: event.target.value,
-    });
+    this.setState({ value: event.target.value, focusRingColor: "blue-500" }, () => adaptInputSize());
     this.debouncedSearch();
   }
 
   onKeyUp(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    return;
     if (window.matchMedia("(max-device-width: 760px)").matches && e.key === "Enter") {
       (e.target as any).blur();
     }
   }
 
   clearInput() {
-    this.setState({
-      value: "",
-      fetchState: {
-        translatedText: "",
-        isLoaded: true,
-        error: null,
+    this.setState(
+      {
+        value: "",
+        fetchState: {
+          translatedText: "",
+          isLoaded: true,
+          error: null,
+        },
       },
-    });
-    let textfield = document.getElementById("textInput");
-    if (textfield) {
-      textfield.focus();
-    }
+      () => {
+        adaptInputSize();
+        adaptResultSize();
+        let textfield = document.getElementById("textInput");
+        if (textfield) {
+          textfield.focus();
+        }
+      }
+    );
   }
 
   public render() {
@@ -99,6 +94,15 @@ export default class Textfields extends React.Component<ITextfieldsProps, ITextf
         return "Error";
       }
       return translatedText;
+    };
+    const ringColor = () => {
+      if (this.state.fetchState.error) {
+        return "red-500";
+      }
+      if (!this.state.fetchState.translatedText) {
+        return "blue-500";
+      }
+      return this.state.focusRingColor;
     };
     return (
       <div className="flex flex-col items-center w-full pt-10  xl:max-w-[1200px] px-3 md:px-6 xl:px-0 ">
@@ -119,39 +123,34 @@ export default class Textfields extends React.Component<ITextfieldsProps, ITextf
           <div id="txtParent" className="relative sm:w-2/5 w-full">
             <textarea
               id="textInput"
-              className="block p-2.5 pr-8 w-full h-auto sm:h-64 dark:rounded-md
-            text-gray-900 dark:text-white bg-gray-50 dark:bg-slate-700 border-2 border-black dark:border-none
-             outline-none outline-0 focus:border-gray-700
-             dark:focus:ring-2 dark:focus:ring-blue-500 focus:outline-none appearance-none
-             dark:focus:bg-transparent
-            shadow-[5px_5px_0px_0px_rgb(0,219,195)] dark:shadow-none"
+              className={`block p-2.5 pr-8 w-full h-auto sm:h-64 dark:rounded-md
+              text-gray-900 dark:text-white bg-gray-50 dark:bg-slate-700 dark:focus:bg-transparent
+              border-2 border-black dark:border-none focus:border-gray-700
+              shadow-[5px_5px_0px_0px_rgb(0,219,195)] dark:shadow-none
+              outline-none dark:focus:ring-2 ring-${ringColor()}`}
               placeholder={"Enter text to translate"}
               value={this.state.value}
               onChange={this.handleInputChange}
-              onKeyUp={this.onKeyUp}
+              onKeyDown={this.onKeyUp}
             />
-            {this.state.value ? <ClearInput clearInput={this.clearInput} /> : <div />}
+            {this.state.value && <ClearInput clearInput={this.clearInput} />}
           </div>
           <div className="flex justify-center items-center sm:w-auto w-3/4 sm:my-0 my-3">
             {!this.state.fetchState.isLoaded ? <Spinner /> : <div className="w-20 h-8" />}
           </div>
-          <div className="relative sm:w-2/5 w-full">
+
+          <div id="resParent" className="relative sm:w-2/5 w-full">
             <textarea
-              className="block p-2.5 pr-8 w-full h-64 dark:rounded-md
+              id="resField"
+              className="block p-2.5 pr-8 w-full h-auto sm:h-64 dark:rounded-md
             text-gray-900 dark:text-white bg-gray-50 dark:bg-slate-700 border-2 border-black  outline-none outline-0
              shadow-[5px_5px_0px_0px_rgb(0,219,195)] dark:shadow-none dark:border-none"
               placeholder={"Translation"}
               value={textOutput()}
               readOnly={true}
             />
-            {this.state.fetchState.translatedText ? (
-              <CopyToClipboard
-                onClick={() => {
-                  navigator.clipboard.writeText(this.state.fetchState.translatedText);
-                }}
-              />
-            ) : (
-              <div />
+            {this.state.fetchState.translatedText && (
+              <CopyToClipboard translatedText={this.state.fetchState.translatedText} />
             )}
           </div>
         </div>

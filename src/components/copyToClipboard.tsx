@@ -2,7 +2,7 @@ import { useState } from "react";
 import ReactTooltip from "react-tooltip-rc";
 
 export interface ICopyToClipboardProps {
-  onClick: () => void;
+  translatedText: string;
 }
 
 export function CopyToClipboard(props: ICopyToClipboardProps) {
@@ -13,8 +13,9 @@ export function CopyToClipboard(props: ICopyToClipboardProps) {
               absolute top-2.5 right-2.5 "
     >
       <button
+        className="cursor-pointer"
         onClick={() => {
-          props.onClick();
+          navigator.clipboard.writeText(props.translatedText);
           setTooltipText("Copied to Clipboard");
           setTimeout(() => {
             setTooltipText("Copy to Clipboard");
