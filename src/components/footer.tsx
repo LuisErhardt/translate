@@ -6,7 +6,7 @@ const Footer: React.FunctionComponent<IFooterProps> = (props) => {
   return (
     <div className="px-5 sm:px-20 w-full">
       <div
-        className="w-full h-16 py-2
+        className="w-full py-2
    border-t border-slate-600 dark:border-slate-500 text-slate-600 dark:text-slate-400"
       >
         <p className="flex justify-center">
