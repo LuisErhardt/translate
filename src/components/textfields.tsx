@@ -89,7 +89,7 @@ export default class Textfields extends React.Component<ITextfieldsProps, ITextf
     return (
       <div
         className="flex flex-col items-center w-full pt-10  xl:max-w-[1200px] px-3 md:px-6 xl:px-0 
-      h-fit min-h-[75%]"
+      h-fit m-auto"
       >
         <LanguageSelection
           sourceLang={this.state.sourceLang}

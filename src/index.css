@@ -18,7 +18,10 @@ textarea {
   resize: none;
 }
 
-html,
+html {
+  height: 100vh;
+}
+
 body,
 #root {
   height: 100%;
