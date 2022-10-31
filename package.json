@@ -23,12 +23,14 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "predeploy": "npm version patch && npm run build",
+    "predeploy": "npm run buildCss && npm version patch && npm run build",
     "deploy": "gh-pages -d build",
+    "prestart": "npm run buildCss",
     "start": "BROWSER=none react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "buildCss": "postcss src/index.css -o src/dist/tailwind.css"
   },
   "eslintConfig": {
     "extends": [
@@ -43,16 +45,17 @@
       "not op_mini all"
     ],
     "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
     ]
   },
   "devDependencies": {
     "@types/lodash": "^4.14.185",
     "autoprefixer": "^10.4.12",
     "gh-pages": "^4.0.0",
-    "postcss": "^8.4.16",
+    "postcss": "^8.4.18",
+    "postcss-cli": "^10.0.0",
     "tailwindcss": "^3.1.8"
   }
 }

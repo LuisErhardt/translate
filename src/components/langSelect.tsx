@@ -53,7 +53,7 @@ export default class LangSelect extends React.Component<ILangSelectProps, ILangS
           className="font-semibold tracking-wider border-2 border-black dark:border-none 
           bg-teal-400 dark:bg-slate-700 text-black dark:text-white 
           hover:bg-teal-600 focus:ring-4 focus:outline-none focus:ring-white 
-          dark:hover:bg-blue-500 dark:focus:ring-0
+          dark:hover:bg-blue-500 dark:focus:ring-0 appearance-none
           my-3 px-4 py-2.5 w-full dark:rounded-md text-center inline-flex items-center"
           onChange={(ev: React.ChangeEvent<HTMLSelectElement>): void => this.props.onChange(ev.target.value)}
           value={this.props.selectedLang}
