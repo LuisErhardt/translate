@@ -14,8 +14,8 @@ const ConnectionError: React.FunctionComponent<IConnectionErrorProps> = (props) 
       <div
         ref={nodeRef}
         className="absolute z-50 text-white bg-red-500 
-    dark:rounded-md mt-10 xl:max-w-[800px] mx-5 md:mx-0 p-5 text-2xl
-    shadow-[0_0_0_max(100vh,100vw)_rgba(0,0,0,.5)]"
+    dark:rounded-md mt-10 xl:max-w-[800px] p-5 text-2xl
+    shadow-[0_0_0_max(100vh,100vw)_rgba(0,0,0,.5)] left-0 right-0 mx-auto"
       >
         <h3 className="font-bold">No Connection</h3>
         <p>Unfortunately, the app can't connect to the server. </p>
